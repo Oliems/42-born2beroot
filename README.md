@@ -1,79 +1,62 @@
 # 42cursus - Born2beroot
 
 ## Table of Contents
-1. [General Knowledge](#general-knowledge)
-2. [Installation](#installation)
-3. [*sudo*](#sudo)
-    - [Step 1: Installing *sudo*](#step-1-installing-sudo)
-    - [Step 2: Adding User to *sudo*
-      Group](#step-2-adding-user-to-sudo-group)
-    - [Step 3: Running *root*-Privileged
-      Commands](#step-3-running-root-privileged-commands)
-    - [Step 4: Configuring *sudo*](#step-4-configuring-sudo)
-4. [SSH](#ssh)
-    - [Step 1: Installing & Configuring
-      SSH](#step-1-installing--configuring-ssh)
-    - [Step 2: Installing & Configuring
-      UFW](#step-2-installing--configuring-ufw)
-    - [Step 3: Connecting to Server via
-      SSH](#step-3-connecting-to-server-via-ssh)
-5. [User Management](#user-management)
-    - [Step 1: Setting Up a Strong Password
-      Policy](#step-1-setting-up-a-strong-password-policy)
-       - [Password Age](#password-age)
-       - [Password Strength](#password-strength)
-    - [Step 2: Creating a New User](#step-2-creating-a-new-user)
-    - [Step 3: Creating a New Group](#step-3-creating-a-new-group)
-6. [*cron*](#cron)
-    - [Setting Up a *cron* Job](#setting-up-a-cron-job)
-7. [Bonus](#bonus)
-    - [Installation](#1-installation)
-    - [Linux Lighttpd MariaDB PHP *(LLMP)*
-      Stack](#2-linux-lighttpd-mariadb-php-llmp-stack)
-       - [Step 1: Installing Lighttpd](#step-1-installing-lighttpd)
-       - [Step 2: Installing & Configuring
-         MariaDB](#step-2-installing--configuring-mariadb)
-       - [Step 3: Installing PHP](#step-3-installing-php)
-       - [Step 4: Downloading & Configuring
-         WordPress](#step-4-downloading--configuring-wordpress)
-       - [Step 5: Configuring Lighttpd](#step-5-configuring-lighttpd)
-    - [File Transfer Protocol *(FTP)*](#3-file-transfer-protocol-ftp)
-       - [Step 1: Installing & Configuring
-         FTP](#step-1-installing--configuring-ftp)
-       - [Step 2: Connecting to Server via
-         FTP](#step-2-connecting-to-server-via-ftp)
+- [42cursus - Born2beroot](#42cursus---born2beroot)
+	- [Table of Contents](#table-of-contents)
+	- [Presentation](#presentation)
+	- [Installation](#installation)
+	- [*sudo*](#sudo)
+		- [Installing *sudo*](#installing-sudo)
+		- [Adding User to *sudo* Group](#adding-user-to-sudo-group)
+		- [Running *root*-Privileged Commands](#running-root-privileged-commands)
+		- [Configuring *sudo*](#configuring-sudo)
+		- [To log all *sudo* commands to `/var/log/sudo/<filename>`:](#to-log-all-sudo-commands-to-varlogsudofilename)
+	- [SSH](#ssh)
+		- [Installing \& Configuring SSH](#installing--configuring-ssh)
+		- [Installing \& Configuring UFW](#installing--configuring-ufw)
+		- [Connecting to Server via SSH](#connecting-to-server-via-ssh)
+	- [User Management](#user-management)
+		- [Setting Up a Strong Password Policy](#setting-up-a-strong-password-policy)
+			- [Password Age](#password-age)
+			- [Password Strength](#password-strength)
+		- [Creating a New User](#creating-a-new-user)
+		- [Creating a New Group](#creating-a-new-group)
+	- [*cron*](#cron)
+		- [Setting Up a *cron* Job](#setting-up-a-cron-job)
+	- [Bonus](#bonus)
+		- [#1: Installation](#1-installation)
+		- [#2: Linux Lighttpd MariaDB PHP *(LLMP)* Stack](#2-linux-lighttpd-mariadb-php-llmp-stack)
+			- [Installing Lighttpd](#installing-lighttpd)
+			- [Installing \& Configuring MariaDB](#installing--configuring-mariadb)
+			- [Installing PHP](#installing-php)
+			- [Downloading \& Configuring WordPress](#downloading--configuring-wordpress)
+			- [Configuring Lighttpd](#configuring-lighttpd)
+		- [#3: File Transfer Protocol *(FTP)*](#3-file-transfer-protocol-ftp)
+			- [Installing \& Configuring FTP](#installing--configuring-ftp)
+			- [Connecting to Server via FTP](#connecting-to-server-via-ftp)
+	- [Q\&A - Preparing for the defense](#qa---preparing-for-the-defense)
+		- [Why Debian?](#why-debian)
+		- [What is a virtual machine?](#what-is-a-virtual-machine)
+		- [Why a VM?](#why-a-vm)
+		- [How does a VM works?](#how-does-a-vm-works)
+		- [What is difference between apt and aptitude?](#what-is-difference-between-apt-and-aptitude)
+		- [What is AppArmor and SELinux](#what-is-apparmor-and-selinux)
+		- [What is SSH?](#what-is-ssh)
+		- [How to create a new user?](#how-to-create-a-new-user)
+		- [What to check?](#what-to-check)
+			- [How to change hostname?](#how-to-change-hostname)
+			- [Where is sudo logs in /var/log/sudo?](#where-is-sudo-logs-in-varlogsudo)
+			- [How to add and remove port 8080 in UFW?](#how-to-add-and-remove-port-8080-in-ufw)
+			- [How to run script every 30 seconds?](#how-to-run-script-every-30-seconds)
 
-## General knowledge
+## Presentation
 
-### What is Debian
-See:
-+ https://en.wikipedia.org/wiki/Debian
-+ https://www.debian.org/
-+ https://www.gnu.org/gnu/linux-and-gnu.en.html
-
-Debian is a free and open-source (FOSS) GNU/Linux operating system.
-
-### What is difference between apt and aptitude?
-See:
-+ https://en.wikipedia.org/wiki/APT_(software)
-+ https://en.wikipedia.org/wiki/Aptitude_(software)
-
-APT is a collection of tools distributed in a package named apt. A
-significant part of APT is defined in a C++ library of functions; APT also
-includes command-line programs for dealing with packages, which use the
-library. Three such programs are *apt, apt-get and apt-cache*.
-
-Basically apt is a package manager, a piece of software used to install
-software packages, while aptitude is a frontend for which aims to make it
-easier to use.
-
-### What is AppArmor and SELinux
-See:
-+ https://en.wikipedia.org/wiki/AppArmor
-+ https://en.wikipedia.org/wiki/Security-Enhanced_Linux
-
-These two programs are modules for the Linux kernel which aims to improve
-the security of the system.
+This document aims to be a walkthrough of the Born2beroot project at 42
+School. It is based on the work of
+[hanshazairi](https://github.com/hanshazairi/42-born2beroot) and
+[HEADLIGHTER](https://github.com/HEADLIGHTER/Born2BeRoot-42). Its goal is
+to unify the two aforementioned sources into one comprehensive guide for
+this project.
 
 ## Installation
 At the time of writing, the latest stable version of
@@ -82,7 +65,7 @@ installation walkthrough *(no audio)* [here](https://youtu.be/2w-2MX5QrQw).
 
 ## *sudo*
 
-### Step 1: Installing *sudo*
+### Installing *sudo*
 Switch to *root* and its environment via `su -`.
 ```
 $ su -
@@ -98,7 +81,7 @@ Verify whether *sudo* was successfully installed via `dpkg -l | grep sudo`.
 # dpkg -l | grep sudo
 ```
 
-### Step 2: Adding User to *sudo* Group
+### Adding User to *sudo* Group
 Add user to *sudo* group via `adduser <username> sudo`.
 ```
 # adduser <username> sudo
@@ -116,24 +99,24 @@ $ getent group sudo
 via `sudo -v`.
 ```
 # reboot
-<--->
+# -->
 Debian GNU/Linux 10 <hostname> tty1
 
 <hostname> login: <username>
 Password: <password>
-<--->
+# -->
 $ sudo -v
-[sudo] password for <username>: <password>
+[sudo password for <username>: <password>
 ```
 
-### Step 3: Running *root*-Privileged Commands
+### Running *root*-Privileged Commands
 From here on out, run *root*-privileged commands via prefix `sudo`. For
 instance:
 ```
 $ sudo apt update
 ```
 
-### Step 4: Configuring *sudo*
+### Configuring *sudo*
 Configure *sudo* via `sudo vi /etc/sudoers.d/<filename>`. `<filename>`
 shall not end in `~` or contain `.`.
 ```
@@ -172,7 +155,7 @@ Defaults        secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/
 
 ## SSH
 
-### Step 1: Installing & Configuring SSH
+### Installing & Configuring SSH
 Install *openssh-server* via `sudo apt install openssh-server`.
 ```
 $ sudo apt install openssh-server
@@ -212,7 +195,7 @@ $ sudo service ssh status
 >$ systemctl status ssh
 >```
 
-### Step 2: Installing & Configuring UFW
+### Installing & Configuring UFW
 Install *ufw* via `sudo apt install ufw`.
 ```
 $ sudo apt install ufw
@@ -234,7 +217,7 @@ Check UFW status via `sudo ufw status`.
 $ sudo ufw status
 ```
 
-### Step 3: Connecting to Server via SSH
+### Connecting to Server via SSH
 SSH into your virtual machine using Port 4242 via `ssh
 <username>@<ip-address> -p 4242`.
 ```
@@ -251,7 +234,7 @@ $ logout
 
 ## User Management
 
-### Step 1: Setting Up a Strong Password Policy
+### Setting Up a Strong Password Policy
 
 #### Password Age
 Configure password age policy via `sudo vi /etc/login.defs`.
@@ -332,7 +315,7 @@ Finally, it should look like the below:
 password        requisite                       pam_pwquality.so retry=3 minlen=10 ucredit=-1 dcredit=-1 maxrepeat=3 reject_username difok=7 enforce_for_root
 ```
 
-### Step 2: Creating a New User
+### Creating a New User
 Create new user via `sudo adduser <username>`.
 ```
 $ sudo adduser <username>
@@ -355,7 +338,7 @@ Maximum number of days between password change		: <PASS_MAX_DAYS>
 Number of days of warning before password expires	: <PASS_WARN_AGE>
 ```
 
-### Step 3: Creating a New Group
+### Creating a New Group
 Create new *user42* group via `sudo addgroup user42`.
 ```
 $ sudo addgroup user42
@@ -399,11 +382,11 @@ $ sudo crontab -u root -l
 
 ### #1: Installation
 Watch *bonus* installation walkthrough *(no audio)*
-[here](https://youtu.be/2w-2MX5QrQw).
+[here(https://youtu.be/2w-2MX5QrQw).
 
 ### #2: Linux Lighttpd MariaDB PHP *(LLMP)* Stack
 
-#### Step 1: Installing Lighttpd
+#### Installing Lighttpd
 Install *lighttpd* via `sudo apt install lighttpd`.
 ```
 $ sudo apt install lighttpd
@@ -418,7 +401,7 @@ Allow incoming connections using Port 80 via `sudo ufw allow 80`.
 $ sudo ufw allow 80
 ```
 
-#### Step 2: Installing & Configuring MariaDB
+#### Installing & Configuring MariaDB
 Install *mariadb-server* via `sudo apt install mariadb-server`.
 ```
 $ sudo apt install mariadb-server
@@ -433,47 +416,47 @@ mysql_secure_installation`.
 ```
 $ sudo mysql_secure_installation
 Enter current password for root (enter for none): #Just press Enter (do not confuse database root with system root)
-Set root password? [Y/n] n
-Remove anonymous users? [Y/n] Y
-Disallow root login remotely? [Y/n] Y
-Remove test database and access to it? [Y/n] Y
-Reload privilege tables now? [Y/n] Y
+Set root password? [Y/n n
+Remove anonymous users? [Y/n Y
+Disallow root login remotely? [Y/n Y
+Remove test database and access to it? [Y/n Y
+Reload privilege tables now? [Y/n Y
 ```
 Log in to the MariaDB console via `sudo mariadb`.
 ```
 $ sudo mariadb
-MariaDB [(none)]>
+MariaDB [(none)>
 ```
 Create new database via `CREATE DATABASE <database-name>;`.
 ```
-MariaDB [(none)]> CREATE DATABASE <database-name>;
+MariaDB [(none)> CREATE DATABASE <database-name>;
 ```
 Create new database user and grant them full privileges on the
 newly-created database via `GRANT ALL ON <database-name>.* TO
 '<username-2>'@'localhost' IDENTIFIED BY '<password-2>' WITH GRANT
 OPTION;`.
 ```
-MariaDB [(none)]> GRANT ALL ON <database-name>.* TO '<username-2>'@'localhost' IDENTIFIED BY '<password-2>' WITH GRANT OPTION;
+MariaDB [(none)> GRANT ALL ON <database-name>.* TO '<username-2>'@'localhost' IDENTIFIED BY '<password-2>' WITH GRANT OPTION;
 ```
 Flush the privileges via `FLUSH PRIVILEGES;`.
 ```
-MariaDB [(none)]> FLUSH PRIVILEGES;
+MariaDB [(none)> FLUSH PRIVILEGES;
 ```
 Exit the MariaDB shell via `exit`.
 ```
-MariaDB [(none)]> exit
+MariaDB [(none)> exit
 ```
 Verify whether database user was successfully created by logging in to the
 MariaDB console via `mariadb -u <username-2> -p`.
 ```
 $ mariadb -u <username-2> -p
 Enter password: <password-2>
-MariaDB [(none)]>
+MariaDB [(none)>
 ```
 Confirm whether database user has access to the database via `SHOW
 DATABASES;`.
 ```
-MariaDB [(none)]> SHOW DATABASES;
+MariaDB [(none)> SHOW DATABASES;
 +--------------------+
 | Database           |
 +--------------------+
@@ -483,10 +466,10 @@ MariaDB [(none)]> SHOW DATABASES;
 ```
 Exit the MariaDB shell via `exit`.
 ```
-MariaDB [(none)]> exit
+MariaDB [(none)> exit
 ```
 
-#### Step 3: Installing PHP
+#### Installing PHP
 Install *php-cgi* & *php-mysql* via `sudo apt install php-cgi php-mysql`.
 ```
 $ sudo apt install php-cgi php-mysql
@@ -497,7 +480,7 @@ Verify whether *php-cgi* & *php-mysql* was successfully installed via `dpkg
 $ dpkg -l | grep php
 ```
 
-#### Step 4: Downloading & Configuring WordPress
+#### Downloading & Configuring WordPress
 Install *wget* via `sudo apt install wget`.
 ```
 $ sudo apt install wget
@@ -548,7 +531,7 @@ with:
 29 define( 'DB_PASSWORD', '<password-2>' );^M
 ```
 
-#### Step 5: Configuring Lighttpd
+#### Configuring Lighttpd
 Enable below modules via `sudo lighty-enable-mod fastcgi; sudo
 lighty-enable-mod fastcgi-php; sudo service lighttpd force-reload`.
 ```
@@ -559,7 +542,7 @@ $ sudo service lighttpd force-reload
 
 ### #3: File Transfer Protocol *(FTP)*
 
-#### Step 1: Installing & Configuring FTP
+#### Installing & Configuring FTP
 Install FTP via `sudo apt install vsftpd`.
 ```
 $ sudo apt install vsftpd
@@ -609,9 +592,138 @@ userlist_deny=NO
 <~~~>
 ```
 
-#### Step 2: Connecting to Server via FTP
+#### Connecting to Server via FTP
 FTP into your virtual machine via `ftp <ip-address>`.
 ```
 $ ftp <ip-address>
 ```
 Terminate FTP session at any time via `CTRL + D`.
+
+## Q&A - Preparing for the defense
+
+This section gives you an overview of what you need to know for the defense.
+
+### Why Debian?
+See:
++ https://www.debian.org/
++ https://en.wikipedia.org/wiki/Debian
+
+I chose Debian because it is easier to install and configure than CentOS,
+and because I was already familiar with Debian.
+
+### What is a virtual machine?
+See:
++ https://en.wikipedia.org/wiki/VirtualBox
++ https://en.wikipedia.org/wiki/QEMU
++ https://en.wikipedia.org/wiki/Virtual_machine
+
+In computing, a virtual machine is the virtualization/emulation of a
+computer system. Virtual machines are based on computer architectures and
+provide functionality of a physical computer. Their implementations may
+involve specialized hardware or software. It allows the user to run several
+operating systems on the same host, each VM being separated both from the
+host and from other VMs.
+
+### Why a VM?
+VMs may be deployed to accommodate different levels of processing power
+needs, to run software that requires a different operating system, or to
+test applications in a safe, sandboxed environment.
+
+### How does a VM works?
+See:
++ https://en.wikipedia.org/wiki/Hardware_virtualization
++ https://en.wikipedia.org/wiki/Hypervisor
+
+Virtual machines relies on virtualization e.g software used to simulate
+virtual hardware that allows VMs to run on a single host machine.
+
+### What is difference between apt and aptitude?
+See:
++ https://en.wikipedia.org/wiki/APT_(software)
++ https://en.wikipedia.org/wiki/Aptitude_(software)
+
+APT is a collection of tools distributed in a package named apt. A
+significant part of APT is defined in a C++ library of functions; APT also
+includes command-line programs for dealing with packages, which use the
+library. Three such programs are *apt, apt-get and apt-cache*.
+
+Basically apt is a package manager, a piece of software used to manage the
+installation of programs, while aptitude is a frontend for apt which aims
+to make it easier to use by providing a user interface based on ncurses.
+
+### What is AppArmor and SELinux
+See:
++ https://en.wikipedia.org/wiki/AppArmor
++ https://en.wikipedia.org/wiki/Security-Enhanced_Linux
+
+These two programs are modules for the Linux kernel which aims to improve
+the security of the system.
+
+### What is SSH?
++ https://en.wikipedia.org/wiki/Secure_Shell
+
+SSH (Secure Shell Protocol)`is a network protocol that gives users,
+particularly system administrators, a secure way to access a computer
+remotely over an unsecured network.
+
+### How to create a new user?
+
+```
+$ sudo adduser username				# creating new user (yes (no))
+$ sudo chage -l username			# Verify password expire info for new user
+$ sudo adduser username sudo		# assign new user to the sudo group
+$ sudo adduser username user42		# assign new user to the user42 group
+```
+
+### What to check?
+
+```
+$ lsblk									#  1) Check partitions
+$ getent group sudo						#  3) sudo group users
+$ sudo aa-status						#  2) AppArmor status
+$ getent group user42					#  4) user42 group users
+$ sudo service ssh status				#  5) ssh status, yep
+$ sudo ufw status						#  6) ufw status
+$ ssh username@ipadress -p 4242			#  7) connect to VM from your host (physical) machine via SSH
+$ vi /etc/sudoers.d/<filename>			#  8) yes, sudo config file. You can $ ls /etc/sudoers.d first
+$ vi /etc/login.defs					#  9) password expire policy
+$ vi /etc/pam.d/common-password			# 10) password policy
+$ sudo crontab -l						# 11) cron schedule
+```
+
+#### How to change hostname?
+```
+$ sudo vi /etc/hostname
+```
+
+#### Where is sudo logs in /var/log/sudo?
+```
+# The directories with names like 01 2B 9S 4D etc. contains the logs we need.
+$ cd /var/log/sudo/00/00
+$ sudo apt update 				# Now you see that we have a new directory here.
+$ cd <nameofnewdirectory> && ls
+$ cat log						#  Input log
+$ cat ttyout					#  Output log
+```
+
+#### How to add and remove port 8080 in UFW?
+```
+$ sudo ufw allow 8080		# allow
+$ sudo ufw status			# check
+$ sudo ufw deny 8080		# deny
+```
+
+#### How to run script every 30 seconds?
+Run `sudo crontab -e` and replace or comment (#) the following line :
+```
+*/1 * * * * /path/to/monitoring.sh
+```
+with
+```
+*/1 * * * * sleep 30s && /path/to/monitoring.sh
+```
+To stop the script from running on boot you just need to remove or comment
+the following line:
+```
+@reboot /path/to/monitoring.sh
+```
