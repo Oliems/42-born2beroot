@@ -12,7 +12,7 @@ LOAD_CPU=$(top -bn1 | grep '^%Cpu' | cut -c 9- | xargs | awk '{printf("%.1f%%"),
 LAST_BOOT=$(who -b | awk '$1 == "system" {print $3 " " $4}')
 LVM=$(lsblk | grep "lvm" | wc -l)
 LVM_USED=$(if [ $LVM -eq 0 ]; then echo no; else echo yes; fi)
-# You need to install net tools for the next step [$ sudo apt install net-tools]
+# You need to `sudo apt install net-tools' for the next step to work.
 TCP=$(cat /proc/net/sockstat{,6} | awk '$1 == "TCP:" {print $3}')
 USER_LOG=$(users | wc -w)
 IP=$(hostname -I)
