@@ -10,7 +10,6 @@
 		- [Adding User to *sudo* Group](#adding-user-to-sudo-group)
 		- [Running *root*-Privileged Commands](#running-root-privileged-commands)
 		- [Configuring *sudo*](#configuring-sudo)
-		- [To log all *sudo* commands to `/var/log/sudo/<filename>`:](#to-log-all-sudo-commands-to-varlogsudofilename)
 	- [SSH](#ssh)
 		- [Installing \& Configuring SSH](#installing--configuring-ssh)
 		- [Installing \& Configuring UFW](#installing--configuring-ufw)
@@ -24,14 +23,14 @@
 	- [*cron*](#cron)
 		- [Setting Up a *cron* Job](#setting-up-a-cron-job)
 	- [Bonus](#bonus)
-		- [#1: Installation](#1-installation)
-		- [#2: Linux Lighttpd MariaDB PHP *(LLMP)* Stack](#2-linux-lighttpd-mariadb-php-llmp-stack)
+		- [Installation](#installation-1)
+		- [Linux Lighttpd MariaDB PHP *(LLMP)* Stack](#linux-lighttpd-mariadb-php-llmp-stack)
 			- [Installing Lighttpd](#installing-lighttpd)
 			- [Installing \& Configuring MariaDB](#installing--configuring-mariadb)
 			- [Installing PHP](#installing-php)
 			- [Downloading \& Configuring WordPress](#downloading--configuring-wordpress)
 			- [Configuring Lighttpd](#configuring-lighttpd)
-		- [#3: File Transfer Protocol *(FTP)*](#3-file-transfer-protocol-ftp)
+		- [File Transfer Protocol *(FTP)*](#file-transfer-protocol-ftp)
 			- [Installing \& Configuring FTP](#installing--configuring-ftp)
 			- [Connecting to Server via FTP](#connecting-to-server-via-ftp)
 	- [Q\&A - Preparing for the defense](#qa---preparing-for-the-defense)
@@ -69,16 +68,14 @@ installation walkthrough *(no audio)* [here](https://youtu.be/2w-2MX5QrQw).
 Switch to *root* and its environment via `su -`.
 ```
 $ su -
-Password:
-#
 ```
 Install *sudo* via `apt install sudo`.
 ```
-# apt install sudo
+$ apt install sudo
 ```
 Verify whether *sudo* was successfully installed via `dpkg -l | grep sudo`.
 ```
-# dpkg -l | grep sudo
+$ dpkg -l | grep sudo
 ```
 
 ### Adding User to *sudo* Group
@@ -97,17 +94,6 @@ $ getent group sudo
 ```
 `reboot` for changes to take effect, then log in and verify *sudopowers*
 via `sudo -v`.
-```
-# reboot
-# -->
-Debian GNU/Linux 10 <hostname> tty1
-
-<hostname> login: <username>
-Password: <password>
-# -->
-$ sudo -v
-[sudo password for <username>: <password>
-```
 
 ### Running *root*-Privileged Commands
 From here on out, run *root*-privileged commands via prefix `sudo`. For
@@ -117,53 +103,35 @@ $ sudo apt update
 ```
 
 ### Configuring *sudo*
-Configure *sudo* via `sudo vi /etc/sudoers.d/<filename>`. `<filename>`
-shall not end in `~` or contain `.`.
+See [this page](https://superuser.com/questions/869144/why-does-the-system-have-etc-sudoers-d-how-should-i-edit-it)
+if you want to learn more about sudo and the sudoers.d folder.
+
+Configure *sudo* via `sudo vi /etc/sudoers.d/<filename>`. `<filename>` can
+be whatever you want but it shall not end in `~` or contain `.`, let's name
+it `config`.
 ```
-$ sudo vi /etc/sudoers.d/<filename>
+$ sudo vi /etc/sudoers.d/config
 ```
-To limit authentication using *sudo* to 3 attempts *(defaults to 3 anyway)*
-in the event of an incorrect password, add below line to the file.
+Below are the options you need to change, see the [sudoers man page](https://www.sudo.ws/docs/man/1.8.13/sudoers.man/)
+for more information.
 ```
-Defaults        passwd_tries=3
-```
-To add a custom error message in the event of an incorrect password:
-```
-Defaults        badpass_message="<custom-error-message>"
-```
-### To log all *sudo* commands to `/var/log/sudo/<filename>`:
-```
-$ sudo mkdir /var/log/sudo
-<~~~>
-Defaults        logfile="/var/log/sudo/<filename>"
-<~~~>
-```
-To archive all *sudo* inputs & outputs to `/var/log/sudo/`:
-```
-Defaults        log_input,log_output
-Defaults        iolog_dir="/var/log/sudo"
-```
-To require *TTY*:
-```
-Defaults        requiretty
-```
-To set *sudo* paths to
-`/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin`:
-```
-Defaults        secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
+Defaults passwd_tries=3
+Defaults badpass_message="<custom-error-message>"
+Defaults logfile="/var/log/sudo/<filename>"
+Defaults log_input,log_output
+Defaults iolog_dir="/var/log/sudo"
+Defaults requiretty
+Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
 ```
 
 ## SSH
 
 ### Installing & Configuring SSH
+See the [sshd man page](https://man.openbsd.org/sshd_config) for more information.
+
 Install *openssh-server* via `sudo apt install openssh-server`.
 ```
 $ sudo apt install openssh-server
-```
-Verify whether *openssh-server* was successfully installed via `dpkg -l |
-grep ssh`.
-```
-$ dpkg -l | grep ssh
 ```
 Configure SSH via `sudo vi /etc/ssh/sshd_config`.
 ```
@@ -171,20 +139,20 @@ $ sudo vi /etc/ssh/sshd_config
 ```
 To set up SSH using Port 4242, replace below line:
 ```
-13 #Port 22
+#Port 22
 ```
 with:
 ```
-13 Port 4242
+Port 4242
 ```
 To disable SSH login as *root* irregardless of authentication mechanism,
 replace below line
 ```
-32 #PermitRootLogin prohibit-password
+#PermitRootLogin prohibit-password
 ```
 with:
 ```
-32 PermitRootLogin no
+PermitRootLogin no
 ```
 Check SSH status via `sudo service ssh status`.
 ```
@@ -218,6 +186,20 @@ $ sudo ufw status
 ```
 
 ### Connecting to Server via SSH
+
+**WARNING**: SSHing into the server might not work even if everything is
+configured properly. If you have an IP address like the one in the
+screenshot below chances are you will get this error:
+```
+setsockopt SO_KEEPALIVE: Invalid argument
+write: Broken pipe
+```
+
+You can check the IP address of your machine using the `ip addr` command and
+look for the second line beginning with inet:
+
+![IP Screenshot](img/ip_addr.png)
+
 SSH into your virtual machine using Port 4242 via `ssh
 <username>@<ip-address> -p 4242`.
 ```
@@ -243,45 +225,38 @@ $ sudo vi /etc/login.defs
 ```
 To set password to expire every 30 days, replace below line
 ```
-160 PASS_MAX_DAYS   99999
+PASS_MAX_DAYS   99999
 ```
 with:
 ```
-160 PASS_MAX_DAYS   30
+PASS_MAX_DAYS   30
 ```
 To set minimum number of days between password changes to 2 days, replace
 below line
 ```
-161 PASS_MIN_DAYS   0
+PASS_MIN_DAYS   0
 ```
 with:
 ```
-161 PASS_MIN_DAYS   2
+PASS_MIN_DAYS   2
 ```
 To send user a warning message 7 days *(defaults to 7 anyway)* before
 password expiry, keep below line as is.
 ```
-162 PASS_WARN_AGE   7
+PASS_WARN_AGE   7
 ```
 
 #### Password Strength
 Secondly, to set up policies in relation to password strength, install the
-*libpam-pwquality* package.
+*libpam-pwquality* package. See the [man page](https://linux.die.net/man/8/pam_pwquality)
+for more informations.
 ```
 $ sudo apt install libpam-pwquality
 ```
-Verify whether *libpam-pwquality* was successfully installed via `dpkg -l |
-grep libpam-pwquality`.
-```
-$ dpkg -l | grep libpam-pwquality
-```
 Configure password strength policy via `sudo vi
-/etc/pam.d/common-password`, specifically the below line:
+/etc/pam.d/common-password`, specifically the line containing:
 ```
-$ sudo vi /etc/pam.d/common-password
-<~~~>
-25 password        requisite                       pam_pwquality.so retry=3
-<~~~>
+pam_pwquality.so retry=3
 ```
 To set password minimum length to 10 characters, add below option to the
 above line.
@@ -361,17 +336,18 @@ $ getent group user42
 ## *cron*
 
 ### Setting Up a *cron* Job
+See the [crontab man page](https://man7.org/linux/man-pages/man5/crontab.5.html) for more information.
 Configure *cron* as *root* via `sudo crontab -u root -e`.
 ```
 $ sudo crontab -u root -e
 ```
 To schedule a shell script to run every 10 minutes, replace below line
 ```
-23 # m h  dom mon dow   command
+# m h  dom mon dow   command
 ```
 with:
 ```
-23 */10 * * * * sh /path/to/script
+*/10 * * * * sh /path/to/script
 ```
 Check *root*'s scheduled *cron* jobs via `sudo crontab -u root -l`.
 ```
@@ -380,11 +356,11 @@ $ sudo crontab -u root -l
 
 ## Bonus
 
-### #1: Installation
+### Installation
 Watch *bonus* installation walkthrough *(no audio)*
 [here(https://youtu.be/2w-2MX5QrQw).
 
-### #2: Linux Lighttpd MariaDB PHP *(LLMP)* Stack
+### Linux Lighttpd MariaDB PHP *(LLMP)* Stack
 
 #### Installing Lighttpd
 Install *lighttpd* via `sudo apt install lighttpd`.
@@ -540,7 +516,7 @@ $ sudo lighty-enable-mod fastcgi-php
 $ sudo service lighttpd force-reload
 ```
 
-### #3: File Transfer Protocol *(FTP)*
+### File Transfer Protocol *(FTP)*
 
 #### Installing & Configuring FTP
 Install FTP via `sudo apt install vsftpd`.
