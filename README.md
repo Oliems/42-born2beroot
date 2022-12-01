@@ -199,25 +199,21 @@ $ sudo ufw status
 
 ### Connecting to Server via SSH
 
-**WARNING**: SSHing into the server might not work even if everything is
-configured properly. If you have an IP address like the one in the
-screenshot below chances are you will get this error:
-```
-setsockopt SO_KEEPALIVE: Invalid argument
-write: Broken pipe
-```
+**WARNING**: In order to connect to the server you need to configure
+port forwarding in the VM settings.
 
-You can check the IP address of your machine using the `ip addr` command and
-look for the second line beginning with inet:
++ Right click on the VM and go to "Settings".
++ Go to the "Network" tab, click on "Advanced" then on "Port Forwarding".
++ Fill in like in the image below.
 
-![IP Screenshot](img/ip_addr.png)
+![Port Forwarding](/img/port-forwarding.png)
 
-SSH into your virtual machine using Port 4242 via `ssh
-<username>@<ip-address> -p 4242`.
+You can now connect to your VM using:
 ```
-$ ssh <username>@<ip-address> -p 4242
+ssh username@127.0.0.1 -p 4242
 ```
-Terminate SSH session at any time via `logout`.
+You can check the IP address of your VM using `ip addr`
+Terminate SSH session at any time via the `logout` or using Ctrl-D.
 ```
 $ logout
 ```
