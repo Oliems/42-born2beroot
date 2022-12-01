@@ -753,6 +753,7 @@ for me but in case you need it, remember to update-grub2 after you've
 uncommented it.
 
 **Font**
+
 See:
   + https://askubuntu.com/a/173221
 
