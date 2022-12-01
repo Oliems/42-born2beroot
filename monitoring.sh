@@ -2,6 +2,7 @@
 KERNEL_VERSION=$(uname -a | fold -w 75 -s)
 PHYSICAL_CPU=$(grep "physical id" /proc/cpuinfo | sort | uniq | wc -l)
 VIRTUAL_CPU=$(grep "^processor" /proc/cpuinfo | wc -l)
+# Print the second column of the line containing "Mem:"
 TOTAL_RAM=$(free -m | awk '$1 == "Mem:" {print $2}')
 USED_RAM=$(free -m | awk '$1 == "Mem:" {print $3}')
 PERCENT_RAM=$(free | awk '$1 == "Mem:" {printf("%.2f"), $3/$2*100}')

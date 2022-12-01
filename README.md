@@ -18,6 +18,7 @@
 		- [Setting Up a Strong Password Policy](#setting-up-a-strong-password-policy)
 			- [Password Age](#password-age)
 			- [Password Strength](#password-strength)
+		- [Changing the passwords](#changing-the-passwords)
 		- [Creating a New User](#creating-a-new-user)
 		- [Creating a New Group](#creating-a-new-group)
 	- [*cron*](#cron)
@@ -36,11 +37,14 @@
 	- [Q\&A - Preparing for the defense](#qa---preparing-for-the-defense)
 		- [Why Debian?](#why-debian)
 		- [What is a virtual machine?](#what-is-a-virtual-machine)
+		- [What is cron and what is wall?](#what-is-cron-and-what-is-wall)
+		- [What is the Logical Volume Manager (LVM)](#what-is-the-logical-volume-manager-lvm)
 		- [Why a VM?](#why-a-vm)
 		- [How does a VM works?](#how-does-a-vm-works)
 		- [What is difference between apt and aptitude?](#what-is-difference-between-apt-and-aptitude)
 		- [What is AppArmor and SELinux](#what-is-apparmor-and-selinux)
 		- [What is SSH?](#what-is-ssh)
+		- [How to change the font and the resolution of the VM](#how-to-change-the-font-and-the-resolution-of-the-vm)
 		- [How to create a new user?](#how-to-create-a-new-user)
 		- [What to check?](#what-to-check)
 			- [How to change hostname?](#how-to-change-hostname)
@@ -62,6 +66,10 @@ At the time of writing, the latest stable version of
 [Debian](https://www.debian.org) is *Debian 11 Bullseye*. Watch *bonus*
 installation walkthrough *(no audio)* [here](https://youtu.be/2w-2MX5QrQw).
 
+WARNING: Do not forget to partition the disk correctly if you want to do the bonus.
+
+After the installation you might want to [change the font and the resolution](#how-to-change-the-font-and-the-resolution-of-the-vm)
+before you start configuring the VM.
 ## *sudo*
 
 ### Installing *sudo*
@@ -81,11 +89,11 @@ $ dpkg -l | grep sudo
 ### Adding User to *sudo* Group
 Add user to *sudo* group via `adduser <username> sudo`.
 ```
-# adduser <username> sudo
+$ adduser <username> sudo
 ```
 >Alternatively, add user to *sudo* group via `usermod -aG sudo <username>`.
 >```
-># usermod -aG sudo <username>
+>$ usermod -aG sudo <username>
 >```
 Verify whether user was successfully added to *sudo* group via `getent
 group sudo`.
@@ -154,6 +162,10 @@ with:
 ```
 PermitRootLogin no
 ```
+You need to restart the SSH daemon for the changes to take effect:
+```
+$ sudo service ssh restart
+```
 Check SSH status via `sudo service ssh status`.
 ```
 $ sudo service ssh status
@@ -218,6 +230,8 @@ $ logout
 
 ### Setting Up a Strong Password Policy
 
+See the [login.defs man page](https://man7.org/linux/man-pages/man5/login.defs.5.html)
+as well as the [passwd man page](https://man7.org/linux/man-pages/man1/passwd.1.html).
 #### Password Age
 Configure password age policy via `sudo vi /etc/login.defs`.
 ```
@@ -228,7 +242,7 @@ To set password to expire every 30 days, replace below line
 PASS_MAX_DAYS   99999
 ```
 with:
-```
+```add
 PASS_MAX_DAYS   30
 ```
 To set minimum number of days between password changes to 2 days, replace
@@ -245,6 +259,10 @@ password expiry, keep below line as is.
 ```
 PASS_WARN_AGE   7
 ```
+**WARNING:** The changes made to this file applay only to new users. If you
+have already created a user with you username and do not which to create a
+new one to apply changes made to login.defs you can run
+`chage -m 2 -M 30 -W 7 <username>`.
 
 #### Password Strength
 Secondly, to set up policies in relation to password strength, install the
@@ -276,6 +294,13 @@ To reject the password if it contains `<username>` in some form:
 ```
 reject_username
 ```
+**Note:** The subject states that: "The following rule does not apply to
+the root password: The password must have at least 7 characters that are
+not part of the former password." From this [SO answer](https://stackoverflow.com/a/70945482)
+and [the man page](https://man.archlinux.org/man/pam_pwquality.8.en#enforce_for_root) we get that
+this just means that since the root user is not asked for the old password so the check
+which compare the old and the new password are not performed.
+
 To set the number of changes required in the new password from the old
 password to 7:
 ```
@@ -287,8 +312,13 @@ enforce_for_root
 ```
 Finally, it should look like the below:
 ```
-password        requisite                       pam_pwquality.so retry=3 minlen=10 ucredit=-1 dcredit=-1 maxrepeat=3 reject_username difok=7 enforce_for_root
+password	requisite	pam_pwquality.so retry=3 minlen=10 ucredit=-1 dcredit=-1 maxrepeat=3 reject_username difok=7 enforce_for_root
 ```
+### Changing the passwords
+
+After this step you need to change your user password as well as the root password
+so that they conform with the new password policy. You can use the `passwd <username>`
+command to do that.
 
 ### Creating a New User
 Create new user via `sudo adduser <username>`.
@@ -304,10 +334,10 @@ Verify newly-created user's password expiry information via `sudo chage -l
 <username>`.
 ```
 $ sudo chage -l <username>
-Last password change					: <last-password-change-date>
-Password expires					: <last-password-change-date + PASS_MAX_DAYS>
-Password inactive					: never
-Account expires						: never
+Last password change								: <last-password-change-date>
+Password expires									: <last-password-change-date + PASS_MAX_DAYS>
+Password inactive									: never
+Account expires										: never
 Minimum number of days between password change		: <PASS_MIN_DAYS>
 Maximum number of days between password change		: <PASS_MAX_DAYS>
 Number of days of warning before password expires	: <PASS_WARN_AGE>
@@ -600,6 +630,46 @@ involve specialized hardware or software. It allows the user to run several
 operating systems on the same host, each VM being separated both from the
 host and from other VMs.
 
+### What is cron and what is wall?
+
++ Cron: Linux task manager that allows us to execute commands at a certain
+  time. We can automate some tasks just by telling cron what command we
+  want to run at a specific time. For example, if we want to restart our
+  server every day at 4:00 am, instead of having to wake up at that time,
+  cron will do it for us.
+
++ Wall: command used by the root user to send a message to all users
+  currently connected to the server. If the system administrator wants to
+  alert about a major server change that could cause users to log out, the
+  root user could alert them with wall.
+
+### What is the Logical Volume Manager (LVM)
+See:
++ https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)
+
+From the Wikipedia page:
+
+LVM is used for the following purposes:
+
++ Creating single logical volumes of multiple physical volumes or entire
+  hard disks (somewhat similar to RAID 0, but more similar to JBOD),
+  allowing for dynamic volume resizing.
+
++ Managing large hard disk farms by allowing disks to be added and replaced
+  without downtime or service disruption, in combination with hot swapping.
+
++ **On small systems (like a desktop), instead of having to estimate at
+  installation time how big a partition might need to be, LVM allows
+  filesystems to be easily resized as needed.**
+
++ Performing consistent backups by taking snapshots of the logical volumes.
+
++ Encrypting multiple physical partitions with one password.
+
+**LVM can be considered as a thin software layer on top of the hard disks and
+partitions, which creates an abstraction of continuity and ease-of-use for
+managing hard drive replacement, repartitioning and backup.**
+
 ### Why a VM?
 VMs may be deployed to accommodate different levels of processing power
 needs, to run software that requires a different operating system, or to
@@ -638,9 +708,67 @@ the security of the system.
 ### What is SSH?
 + https://en.wikipedia.org/wiki/Secure_Shell
 
-SSH (Secure Shell Protocol)`is a network protocol that gives users,
+SSH (Secure Shell Protocol) is a network protocol that gives users,
 particularly system administrators, a secure way to access a computer
 remotely over an unsecured network.
+
+### How to change the font and the resolution of the VM
+
+**Resolution**
+See:
++ https://superuser.com/a/1034711
+
+A straightforward way of achieving that would be to change the specific
+configuration in the grub2 bootloader directly:
+
+1. Find out the resolutions supported by your debian guest
+
++ Reboot debian and keep pressing `c` until you see the grub console.
++ Type `vbeinfo` and hit enter. It will give you a list of supported resolutions.
+
+2. Edit /etc/grub.d/00_header
+
++ Replace the following line
+```
+if [ "x${GRUB_GFXMODE}" = "x" ] ; then GRUB_GFXMODE=auto ; fi
+```
+with the new resolution. e.g.:
+```
+if [ "x${GRUB_GFXMODE}" = "x" ] ; then GRUB_GFXMODE=1920x1080 ; fi
+```
+Right underneath, make a copy of the line edited and replace MODE with PAYLOAD. e.g.:
+```
+if [ "x${GRUB_GFXPAYLOAD}" = "x" ] ; then GRUB_GFXPAYLOAD=1920x1080 ; fi
+```
+Further below, you'll find the following line:
+```
+set gfxmode=${GRUB_GFXMODE}
+```
+Add the following line below it:
+```
+set gfxpayload=${GRUB_GFXPAYLOAD}
+```
+Reload grub2 configurations by running the command `update-grub2` and then run `reboot`.
+
+[Note]
+I've seen many examples in which the default line `#GRUB_GFXMODE=640x480` in
+the file /etc/default/grub in uncommented. It was proven to be unnecessary
+for me but in case you need it, remember to update-grub2 after you've
+uncommented it.
+
+**Font**
+See:
+  + https://askubuntu.com/a/173221
+
+Just run `sudo dpkg-reconfigure console-setup`.
+I suggest you pick TerminusBold in size 12 or 14 as you font.
+
+**Scale factor**
+
+Even after you have changed the font and the resolution, you might also
+want to increase the scale factor in the VM settings.
++ In VirtualBox right click on your VM and go to "Settings".
++ Go to the "Display" tab and increase scale factor to something like 200%.
 
 ### How to create a new user?
 
